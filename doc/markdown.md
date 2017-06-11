@@ -131,7 +131,7 @@ int main()
 
 ![Coder](https://github.com/wanghaiyang1930/wanghaiyang1930.github.io/blob/master/common/png/coder.png)
 
-[![Build Status](https://github.com/wanghaiyang1930/wanghaiyang1930.github.io/blob/master/common/svg/build-passing-green.svg)](https://github.com/wanghaiyang1930/wanghaiyang1930.github.io)
+[![Build Status](https://travis-ci.org/chrislusf/seaweedfs.svg?branch=master)](https://github.com/wanghaiyang1930/wanghaiyang1930.github.io)
 [![GoDoc](https://github.com/wanghaiyang1930/wanghaiyang1930.github.io/blob/master/common/svg/docs-wiki-blue.svg)](https://github.com/wanghaiyang1930/wanghaiyang1930.github.io)
 [![Wiki](https://github.com/wanghaiyang1930/wanghaiyang1930.github.io/blob/master/common/svg/godoc-reference-blue.svg)](https://github.com/wanghaiyang1930/wanghaiyang1930.github.io)
 
