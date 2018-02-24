@@ -296,7 +296,7 @@ Python一切事物皆对象，在参数传递时使用引用传递。
 	b = bytes( range(10) )
 
 	s = "string"           // "string", b[0] == 115,只可读取，不可赋值
-	b = bytes( s )         // b'string'
+	b = bytes( s, encoding="ASCII" )         // b'string'
 	sh = b.hex()           // '737472696e67'
 	b2 = bytes.fromhex(sh) // b'string'
 ```
@@ -323,6 +323,11 @@ Python一切事物皆对象，在参数传递时使用引用传递。
 
 	list to bytes: b = bytes( l ) (0<<element<<255)
 	bytes to list: l = list( b )
+
+	number to string: s = str(10)
+					  s = str(10.0)
+	string to number: n = int(s)
+					  n = float(s)
 ```
 
 #### Lua

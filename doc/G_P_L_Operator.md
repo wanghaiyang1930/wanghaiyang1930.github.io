@@ -14,7 +14,21 @@
 		second line""")
 ```
 
+> 格式化字符串
+```
+	"%s is %d but %f" % ("five", 5, 5.0)
+	"{0} is {1} but {3}".format("Five", 5, 5.0)
+	"{0} is {1} but {0}".format("Five", 5)
+	"{} is {} but {}".format("Five", 5, 5.0)
+	"{a} is {b} but {c}".format(a="Five", b=5, c=5.0)
 
+	from string import Template
+	s = Template("$a is %b but $c")
+	s.substitute(a="Five", b=5, c=5.0)
+	d = {"a":"Five", "b":5, "c":5.0}
+	s.substitute(d)
+
+```
 
 #### Lua
 
