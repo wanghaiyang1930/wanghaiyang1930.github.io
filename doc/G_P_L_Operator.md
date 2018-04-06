@@ -22,6 +22,8 @@
 	"{} is {} but {}".format("Five", 5, 5.0)
 	"{a} is {b} but {c}".format(a="Five", b=5, c=5.0)
 
+	注意：'{"key":{}, "key":{}}'.format(v, v) 失败：外侧的两个大括号导致了格式化无法识别。
+
 	from string import Template
 	s = Template("$a is %b but $c")
 	s.substitute(a="Five", b=5, c=5.0)
