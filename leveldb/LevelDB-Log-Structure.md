@@ -1,4 +1,6 @@
-#### LevelDB日志文件结构分析
+### LevelDB日志文件结构分析
+
+#### 数据结构 
 
 LevelDB日志文件由一系列Block组成，每个Block固定32KB，文件尾最后一个Block可能不足32KB。
 
@@ -19,4 +21,10 @@ LevelDB有可能将一条过长的用户数据切分放入多个Record中，FIRS
 
 LevelDB会将用户的每一条数据都实时的同步在日志中，目的是为防止内存数据还未来得及固化到磁盘而因外界因素导致数据丢失。但是磁盘化数据总会有效率性与实时性的冲突，每条用户数据都实时的进行了磁盘写操作。
 
-log::Write -> WriteableFile -> PosixWriableFile，最终PosixWriableFile实现了内存与磁盘操作的衔接。其中，WriteableFile和PosixWriableFile是对底层磁盘写的抽象与封装，而log::Write则序列化了日志文件的Block与Record结构。这样的结构有助于WriteableFile和PosixWriableFile的复用，隔离了数据结构与具体的磁盘写入。
+#### 代码结构
+
+- log::Write (db/log_write.h, db/log_write.cc)
+- WriteableFile (include/leveldb/env.h)
+- PosixWriableFile (util/env_posix.cc)
+
+最终PosixWriableFile实现了内存与磁盘操作的衔接。其中，WriteableFile和PosixWriableFile是对底层磁盘写操作的抽象与封装，而log::Write则实现了日志文件的Block与Record结构的序列化。这样的结构有助于WriteableFile和PosixWriableFile的复用，隔离了数据结构与具体的磁盘写入。
