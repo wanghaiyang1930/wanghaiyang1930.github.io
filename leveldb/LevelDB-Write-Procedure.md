@@ -101,7 +101,7 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* my_batch) {
 
 LevelDB在使用后台线程时没有在进程启动时直接启动后台线程，而是在前台线程需要时启动了一个永久后台线程，主要负责数据压缩然后磁盘化。LevelDB在MakeRoomForWrite()函数中选择性的启动了后台线程，这个线程并没有设置退出条件，只是在没有数据需要处理时进入Wait状态，前台线程根据具情况适当的唤醒后台线程。具体调度流程如下图所示。
 
-![MultiThread](https://github.com/wanghaiyang1930/wanghaiyang1930.github.io/blob/master/leveldb/image/LevelDB-Log-Struct.png)
+![MultiThread](https://github.com/wanghaiyang1930/wanghaiyang1930.github.io/blob/master/leveldb/image/LevelDB-Compaction-BGThread.png)
 
 ##### 启示
 
