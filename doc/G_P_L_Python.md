@@ -3,17 +3,17 @@ python
 #### 安装
 
 Python源码编译安装之前需要安装依赖，否则将导致pip3无法使用：
-	yum install zlib-devel
-	yum install openssl-devel
-	yum install bzip2-devel
-	yum install tkinter
-	yum install tk-devel
+- yum install zlib-devel
+- yum install openssl-devel
+- yum install bzip2-devel
+- yum install tkinter
+- yum install tk-devel
 
 #### 绘图库
 
 Python的常用绘图库主要有两个：
-	plotly      pip3 install plotly
-	matplotlib  pip3 install matplotlib
+- plotly      pip3 install plotly
+- matplotlib  pip3 install matplotlib
 
 > matplotlib
 
