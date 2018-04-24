@@ -47,6 +47,70 @@ Python的常用绘图库主要有两个：
 	delimiter.join( list ) 连接
 ```
 
+#### 复制操作
+
+> =（引用拷贝）
+
+```
+	list1 = [1, 2, 3, 4]
+	list2 = list1
+	print( list1 ) # [1, 2, 3, 4]
+	print( list2 ) # [1, 2, 3, 4]
+	list2[0] = 9
+	print( list1 ) # [9, 2, 3, 4]
+	print( list2 ) # [9, 2, 3, 4]
+
+	
+```
+
+> slice（深层拷贝）
+
+```
+	# Python使用切片操作执行copy（浅复制）操作，只对第一层进行值复制，嵌套层次采用引用复制。
+	list1 = [1, 2, 3, 4]
+	slice1 = list1[0:3]
+	slice2 = list1
+	print( slice1 ) # [1, 2, 3]
+	print( slice2 ) # [1, 2, 3]
+	slice2[0] = 0
+	print( slice1 ) # [0, 2, 3]
+	print( slice2 ) # [0, 2, 3]
+	print( list1 )  # [1, 2, 3, 4]
+```
+
+> copy（浅复制）
+
+```
+	import copy # copy执行第一层值复制操作，深层次采用引用复制。
+	list1 = [1, 2, [3, 4]]
+	list2 = copy.copy( list1 )
+	print( list1 )             # [1, 2, [3, 4]]
+	print( list2 )             # [1, 2, [3, 4]]
+	list2.append( 5 )
+	print( list1 )             # [1, 2, [3, 4]]
+	print( list2 )             # [1, 2, [3, 4], 5]
+	list2[2].append( 0 )
+	print( list1 )             # [1, 2, [3, 4, 0]]
+	print( list2 )             # [1, 2, [3, 4, 0], 5]
+
+```
+
+> deepcode（深复制）
+
+```
+	import copy # deepcopy执行完全值复制操作。
+	list1 = [1, 2, [3, 4]]
+	list2 = copy.deepcopy( list1 )
+	print( list1 )                 # [1, 2, [3, 4]]
+	print( list2 )                 # [1, 2, [3, 4]]
+	list2.append( 5 )
+	print( list1 )                 # [1, 2, [3, 4]]
+	print( list2 )                 # [1, 2, [3, 4], 5]
+	list2[2].append( 0 )
+	print( list1 )                 # [1, 2, [3, 4]]
+	print( list2 )                 # [1, 2, [3, 4, 0], 5]
+```
+
 #### 目录操作
 
 ```
