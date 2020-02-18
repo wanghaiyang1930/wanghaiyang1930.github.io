@@ -135,4 +135,64 @@ func (b *Buffer) Reset() { b.Truncate(0) }
 // as a string.  If the Buffer is a nil pointer, it returns "<nil>".
 func (b *Buffer) String() string {}
 
+// Bytes returns a slice of length b.Len() holding the unread portion of the buffer.
+// The slice is valid for use only until the next buffer modification (that is,
+// only until the next call to a method like Read, Write, Reset, or Truncate).
+// The slice aliases the buffer content at least until the next buffer modification,
+// so immediate changes to the slice will affect the result of future reads.
+func (b *Buffer) Bytes() []byte { return b.buf[b.off:] }
+
+// Cap returns the capacity of the buffer's underlying byte slice, that is, the
+// total space allocated for the buffer's data.
+func (b *Buffer) Cap() int { return cap(b.buf) }
+
+// Len returns the number of bytes of the unread portion of the buffer;
+// b.Len() == len(b.Bytes()).
+func (b *Buffer) Len() int { return len(b.buf) - b.off }
+
+```
+
+### 内存分配策略
+```
+当向缓冲区写入数据时，首先会检查当前容量是否满足需求，如果不满足分三种情况处理：
+1）当前内置缓冲区切片buf为空，且写入数据量小于bootstrap的大小（64字节），则bootstrap作为buf
+2）当前未读数据长度+新写入数据长度小于等于缓冲区容量的1/2，则挪动数据（将未读的数据放到已读数据位置）
+3）以上条件不满足，只能重新分配切片，容量设定为2*cap(b.buf) + n，即两倍原来的缓冲区容量+写入数据量大小
+
+// grow grows the buffer to guarantee space for n more bytes.
+// It returns the index where bytes should be written.
+// If the buffer can't grow it will panic with ErrTooLarge.
+func (b *Buffer) grow(n int) int {
+	m := b.Len()
+	// If buffer is empty, reset to recover space.
+	if m == 0 && b.off != 0 {
+		b.Truncate(0)
+	}
+	//如果需要的容量大于现在的容量--->
+	if len(b.buf)+n > cap(b.buf) {
+		var buf []byte
+		//现有的预备64byte可以满足
+		if b.buf == nil && n <= len(b.bootstrap) {
+			buf = b.bootstrap[0:]
+			//实际需要的小于本身切片容量
+		} else if m+n <= cap(b.buf)/2 {
+			// We can slide things down instead of allocating a new
+			// slice. We only need m+n <= cap(b.buf) to slide, but
+			// we instead let capacity get twice as large so we
+			// don't spend all our time copying.
+			copy(b.buf[:], b.buf[b.off:])
+			buf = b.buf[:m]
+		} else {
+			// not enough space anywhere
+			//不够，那就分配2倍加n的容量
+			buf = makeSlice(2*cap(b.buf) + n)
+			copy(buf, b.buf[b.off:])
+		}
+		b.buf = buf
+		b.off = 0
+	}
+	b.buf = b.buf[0 : b.off+m+n]
+	return b.off + m
+}
+
 ```
