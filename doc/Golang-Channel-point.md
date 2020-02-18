@@ -58,16 +58,30 @@ blocking, returning the zero value for the channel element. The form x, ok := <-
 
 - 循环死锁
 ```
-buf1 := make(chan int)
-buf2 := make(chan int)
+package main
+
+import "fmt"
+
+var buf1 = make(chan int)
+var buf2 = make(chan int)
 
 func read() {
-	<- buf1
+	for {
+		v ,ok:= <- buf1
+        if ok{
+            fmt.Printf("read a int is %d\n",v)
+        }else{
+            break
+        }
+	}
 	buf2 <- 1
 }
 
 func write() {
-	buf1 <- 1
+	for i := 0; i < 10; i++ {
+		buf1 <- 1
+	}
+	
 	close(buf1) // 如果不关闭buf1，read和write就会出现互相等待的死锁现象
 }
 
