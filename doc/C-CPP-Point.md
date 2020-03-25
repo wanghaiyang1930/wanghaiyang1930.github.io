@@ -6,7 +6,6 @@
 
 ```
 #include <stdint.h> // C99
-
  
 /* Types for `void *' pointers. */
 #if __WORDSIZE == 64
@@ -38,9 +37,11 @@
 
 ### __builtin_expect
 
-long __builtin_expect(long EXP, long C);
+> long __builtin_expect(long EXP, long C);
 
 告知编译器表达式EXP的取值很可能是C，指令的返回值依然为EXP的取值，如果编译时加上-freorder-blocks选项（在-O2时会启用），编译时会重新安排代码生成顺序，可以提高处理器Pipeline处理的效率（减少了分支跳转）。
+
+如果使用 likely ，则执行 if(likely()){xxx} 的可能性大一下，那么编译器会将 if{} 的内容编译在前面，如果使用 unlikely()，则执行 if(unlikely()){xxx} 的可能性更大一些，那么编译器会将 else{} 的内容编译在前面。
 
 在 EXP 处经常使用 !!(x) 网上有说这是在归一化（1/0），但没有找到官方解释。
 
@@ -77,4 +78,25 @@ long __builtin_expect(long EXP, long C);
 #define likely(x) (x)
 #define unlikely(x) (x)
 #endif
+```
+
+### 宏消息
+
+```
+#error  编译程序时只要遇到#error就生成输出错误信息，同时停止编译
+
+#ifdef XXXX
+#pragma message("Message Info")
+#endif
+```
+
+### 宏常量
+
+```
+Defined by ANSI:
+_LINE_
+_FILE_
+_DATE_
+_TIME_
+_STDC_
 ```
