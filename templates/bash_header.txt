@@ -1,0 +1,5 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 wanghaiyang
+# SPDX-License-Identifier: Apache-2.0
+# @author: wanghaiyang
+# @date: 2025-05-15
+# source setenv.bash

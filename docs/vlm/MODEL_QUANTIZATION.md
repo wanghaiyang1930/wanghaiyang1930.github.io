@@ -43,8 +43,15 @@ uv pip install -r requirements.txt --index-strategy unsafe-best-match
 
 ### 2. 编译（启用 CUDA 后端）
 
+**CUDA**
 ```bash
 cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES="86"
+cmake --build build --config Release -j
+```
+
+**PPU**
+```BASH
+cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES="75" -DGGML_CUDA_FA_ALL_QUANTS=OFF
 cmake --build build --config Release -j
 ```
 
@@ -155,14 +162,29 @@ curl http://localhost:8080/v1/chat/completions \
 **作为 HTTP 服务运行**（OpenAI 兼容多模态接口）：
 
 ```bash
+export CUDA_VISIBLE_DEVICES=0,1,2,3
+
 ./build/bin/llama-server \
-    -m /home/data/Qwen/Qwen3-VL-8B-Instruct-FP16-Q4_K_M.gguf \
-    --mmproj /home/data/Qwen/Qwen3-VL-8B-Instruct-MMPROJ-FP16.gguf \
-    -n 256 -c 8192 -ngl 99 \
+    -m /home/data/Qwen/Qwen3-VL-8B-Instruct-F16.gguf \
+    --mmproj /home/data/Qwen/Qwen3-VL-8B-Instruct-F16-MMPROJ-F16.gguf \
+    -n 1024 -c 262144 -ngl 99 -np 32 \
+    -b 8192 --ubatch-size 4096 \
+    -fa off \
     --image-min-tokens 1024 \
-    --media-path /home/workspace/source/work \
-    --host 0.0.0.0 --port 8080
+    --chat-format chatml \
+    --media-path /home/workspace/source/temp \
+    --host 0.0.0.0 --port 8082
 ```
+
+- -n 单次生成的最大 token 数
+- -c KV cache 的总上下文长度，意味着输入提示和模型输出加起来的 Token 长度不超过 256k(262144)
+- -b 在处理 Prompt（输入提示词） 时，一次性往 GPU 里塞多少个 Token 进行并行计算，该值越大，Prefill 阶段计算密度越高、速度越快，但瞬时显存（激活值）占用也越高
+- --ubatch-size 可以把它理解为一个“动态任务拆分器”，它会把一个大的计算任务（-b 定义的批次）智能地拆分成多个更小的、适合你硬件处理能力的小批次。针对 96G 显存，推荐：-b 16384 或 -b 32768
+- -np 并行 slot 数（最重要的吞吐参数）
+- ngl 0 = 纯 CPU（很慢），99（或任意大数）= 全部层都上 GPU
+- --image-min-tokens 处理图像时，模型会将图片切分成小块并转化为Token，该参数设定了这个转化过程的下限。如果设置较高，能让模型捕捉更多图像细节，显著提升对复杂图像（如包含密集文字的文档、图表）的理解准确率，但会增加计算量和处理时间
+- --chat-format chatml: 不同的语言模型期望收到的对话历史格式是不同的。这个参数就是告诉 llama.cpp 模型“习惯”哪种格式，以便它能将问题、历史回复、系统指令等，正确地组装成模型能理解的提示词（Prompt）。Qwen 系列模型：通常使用 chatml 格式（注意：暂不支持）
+- --reasoning-budget 0 可选参数，关闭 Thinking 模式
 
 带图像的调用示例：
 
