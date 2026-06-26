@@ -447,7 +447,7 @@ evalscope eval \
   --model Qwen3-VL-8B-Instruct \
   --eval-type openai_api \
   --eval-batch-size 8 \
-  --api-url http://localhost:8088/v1/chat/completions \
+  --api-url http://localhost:8081/v1/chat/completions \
   --api-key EMPTY \
   --datasets bfcl_v3 \
   --generation-config '{"timeout": 3600, "retries": 10, "retry_interval": 5, "stream": true, "max_tokens": 4096, "extra_body": {"n_ctx": 262144}}' \
