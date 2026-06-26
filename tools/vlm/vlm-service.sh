@@ -103,6 +103,33 @@ fi
 # Track current child PID for the server bound to our port
 CHILD_PID=0
 
+# Decide how to install a parent-death signal on the child. We need this so
+# that if our script is killed with SIGKILL (uncatchable, no trap runs),
+# the kernel still tears down llama-server. Preference order:
+#   1. setpriv --pdeathsig KILL  (util-linux >= 2.33)
+#   2. python3 ctypes prctl(PR_SET_PDEATHSIG, SIGKILL) trampoline
+PDEATHSIG_METHOD=""
+PDEATHSIG_PYCODE='import ctypes, os, signal, sys
+PR_SET_PDEATHSIG = 1
+libc = ctypes.CDLL("libc.so.6", use_errno=True)
+if libc.prctl(PR_SET_PDEATHSIG, signal.SIGKILL, 0, 0, 0) != 0:
+    err = ctypes.get_errno()
+    sys.stderr.write(f"prctl(PR_SET_PDEATHSIG) failed: {os.strerror(err)}\n")
+    sys.exit(1)
+# Race guard: if parent already died before prctl took effect, exit now.
+if os.getppid() == 1:
+    sys.exit(0)
+os.execvp(sys.argv[1], sys.argv[1:])'
+
+if command -v setpriv >/dev/null 2>&1 && setpriv --help 2>&1 | grep -q -- '--pdeathsig'; then
+    PDEATHSIG_METHOD="setpriv"
+elif command -v python3 >/dev/null 2>&1; then
+    PDEATHSIG_METHOD="python3"
+else
+    echo "[WARN] Neither 'setpriv --pdeathsig' nor 'python3' available." >&2
+    echo "[WARN] llama-server will NOT be killed if this script is SIGKILLed." >&2
+fi
+
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] [port=$PORT] $*"
 }
@@ -155,12 +182,20 @@ start_server() {
     # Use setsid so llama-server becomes its own session/process group leader.
     # This lets us send signals to the entire process group during cleanup,
     # killing llama-server and any helper processes (e.g. ffprobe) it spawned.
-    # If setpriv is available, use --pdeathsig TERM so the kernel kills the
-    # child even when the parent is hit by SIGKILL (which cannot be trapped).
+    #
+    # Configure parent-death signal so the kernel kills llama-server even when
+    # our script is terminated with SIGKILL (which cannot be trapped). We use
+    # SIGKILL (not SIGTERM) because if our script was force-killed, we want
+    # llama-server gone immediately too — no lingering, no graceful path.
     local launcher=()
-    if command -v setpriv >/dev/null 2>&1; then
-        launcher=(setpriv --pdeathsig TERM --)
-    fi
+    case "$PDEATHSIG_METHOD" in
+        setpriv)
+            launcher=(setpriv --pdeathsig KILL --)
+            ;;
+        python3)
+            launcher=(python3 -c "$PDEATHSIG_PYCODE")
+            ;;
+    esac
     local server_args=(
         -m "$MODEL_PATH"
         --mmproj "$MMPROJ_PATH"
