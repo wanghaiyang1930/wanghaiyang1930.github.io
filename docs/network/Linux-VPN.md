@@ -1,3 +1,7 @@
+<!-- SPDX-FileCopyrightText: Copyright (c) 2025 wanghaiyang -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Author: wanghaiyang -->
+<!-- Date: 2026-07-07 -->
 
 # Linux VPN Instruction
 
@@ -41,4 +45,3 @@ google-chrome --proxy-server="http://127.0.0.1:7890"
 ```BASH
 curl ipinfo.io
 http://127.0.0.1:9090/proxies/
-```
