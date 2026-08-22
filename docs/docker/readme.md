@@ -5,8 +5,8 @@
 
 ```BASH
 
-docker export -o ubuntu-2404-cuda-125-py310-iparking-dev-v1.1.tar 9cb993cdfbaa
+docker export -o ubuntu-2404-cuda-125-py310-iparking-dev-v1.3.tar 9cb993cdfbaa
 
-docker import ubuntu-2404-cuda-125-py310-iparking-dev-v1.1.tar.tar ubuntu-2404-cuda-125-py310-iparking-dev:v1.1
+docker import ubuntu-2404-cuda-125-py310-iparking-dev-v1.3.tar.tar ubuntu-2404-cuda-125-py310-iparking-dev:v1.3
 
 ```
